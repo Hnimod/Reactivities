@@ -20,18 +20,8 @@ const ActivityDetail = ({ activity, cancelActivity, openForm }: Props) => {
       </Card.Content>
       <Card.Content extra>
         <Button.Group widths="2">
-          <Button
-            basic
-            color="blue"
-            content="Edit"
-            onClick={() => openForm(activity.id)}
-          />
-          <Button
-            basic
-            color="grey"
-            content="Cancel"
-            onClick={cancelActivity}
-          />
+          <Button basic color="blue" content="Edit" onClick={() => openForm(activity.id)} />
+          <Button basic color="grey" content="Cancel" onClick={cancelActivity} />
         </Button.Group>
       </Card.Content>
     </Card>

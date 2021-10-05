@@ -5,13 +5,15 @@ import { Activity } from "../../../app/models/activity";
 type Props = {
   activity: Activity | undefined;
   closeForm: () => void;
-  createOrEdit: (activity: Activity) => void;
+  createOrEdit: (activity: Activity) => Promise<void>;
+  submitting: boolean;
 };
 
 const ActivityForm = ({
   closeForm,
   activity: selectedActivity,
   createOrEdit,
+  submitting,
 }: Props) => {
   const [activity, setActivity] = useState<Activity>(
     () =>
@@ -26,13 +28,11 @@ const ActivityForm = ({
       }
   );
 
-  const handleSubmit = () => {
-    createOrEdit(activity);
+  const handleSubmit = async () => {
+    await createOrEdit(activity);
   };
 
-  const handleInputChange: ChangeEventHandler<
-    HTMLInputElement | HTMLTextAreaElement
-  > = event => {
+  const handleInputChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = event => {
     const { name, value } = event.target;
     setActivity({ ...activity, [name]: value });
   };
@@ -61,6 +61,7 @@ const ActivityForm = ({
         <Form.Input
           placeholder="Date"
           value={activity.date}
+          type="date"
           name="date"
           onChange={handleInputChange}
         />
@@ -76,13 +77,8 @@ const ActivityForm = ({
           name="venue"
           onChange={handleInputChange}
         />
-        <Button floated="right" positive type="submit" content="Submit" />
-        <Button
-          floated="right"
-          type="button"
-          content="Cancel"
-          onClick={closeForm}
-        />
+        <Button loading={submitting} floated="right" positive type="submit" content="Submit" />
+        <Button floated="right" type="button" content="Cancel" onClick={closeForm} />
       </Form>
     </Segment>
   );
