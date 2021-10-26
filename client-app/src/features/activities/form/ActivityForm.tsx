@@ -1,34 +1,47 @@
+import { ChangeEventHandler, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { ChangeEventHandler, useState } from "react";
+import { useParams, useHistory, Link } from "react-router-dom";
 import { Button, Form, Segment } from "semantic-ui-react";
+
 import { Activity } from "../../../app/models/activity";
 import { useStore } from "../../../app/stores/store";
+import LoadingComponent from "../../../app/layout/LoadingComponent";
 
 const ActivityForm = () => {
+  const history = useHistory();
   const { activityStore } = useStore();
-  const { selectedActivity, closeForm, loading, updateActivity, createActivity } = activityStore;
+  const { loading, updateActivity, createActivity, loadActivity, loadingInitial } = activityStore;
+  const { id } = useParams<{ id: string }>();
+  const [activity, setActivity] = useState<Activity>({
+    id: "",
+    title: "",
+    date: "",
+    description: "",
+    category: "",
+    city: "",
+    venue: "",
+  });
 
-  const [activity, setActivity] = useState<Activity>(
-    () =>
-      selectedActivity ?? {
-        id: "",
-        title: "",
-        date: "",
-        description: "",
-        category: "",
-        city: "",
-        venue: "",
-      }
-  );
+  useEffect(() => {
+    if (id) loadActivity(id).then(activity => setActivity(activity!));
+  }, [id, loadActivity]);
 
   const handleSubmit = () => {
-    activity.id ? updateActivity(activity) : createActivity(activity);
+    activity.id
+      ? updateActivity(activity).then(a => {
+          if (a?.id) history.push(`/activities/${a.id}`);
+        })
+      : createActivity(activity).then(a => {
+          if (a?.id) history.push(`/activities/${a.id}`);
+        });
   };
 
   const handleInputChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = event => {
     const { name, value } = event.target;
     setActivity({ ...activity, [name]: value });
   };
+
+  if (loadingInitial) return <LoadingComponent />;
 
   return (
     <Segment clearing>
@@ -71,7 +84,7 @@ const ActivityForm = () => {
           onChange={handleInputChange}
         />
         <Button loading={loading} floated="right" positive type="submit" content="Submit" />
-        <Button floated="right" type="button" content="Cancel" onClick={closeForm} />
+        <Button as={Link} to="/activities" floated="right" type="button" content="Cancel" />
       </Form>
     </Segment>
   );
