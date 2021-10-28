@@ -7,7 +7,7 @@ import ActivityList from "./ActivityList";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
 import ActivityFilters from "./ActivityFilters";
 
-const ActivityDashboard = () => {
+function ActivityDashboard() {
   const { activityStore } = useStore();
   const { loadingInitial, loadActivities, activityRegistry } = activityStore;
 
@@ -27,6 +27,6 @@ const ActivityDashboard = () => {
       </GridColumn>
     </Grid>
   );
-};
+}
 
 export default observer(ActivityDashboard);

@@ -2,11 +2,11 @@ import { Link } from "react-router-dom";
 import { Item, Button, Segment, Icon } from "semantic-ui-react";
 import { Activity } from "../../../app/models/activity";
 
-type Props = {
+interface Props {
   activity: Activity;
-};
+}
 
-const ActivityListItem = ({ activity }: Props) => {
+function ActivityListItem({ activity }: Props) {
   return (
     <Segment.Group>
       <Segment>
@@ -41,6 +41,6 @@ const ActivityListItem = ({ activity }: Props) => {
       </Segment>
     </Segment.Group>
   );
-};
+}
 
 export default ActivityListItem;

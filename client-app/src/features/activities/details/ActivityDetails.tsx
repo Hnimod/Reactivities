@@ -10,7 +10,7 @@ import ActivityDetailedInfo from "./ActivityDetailedInfo";
 import ActivityDetailedChat from "./ActivityDetailedChat";
 import ActivityDetailedSidebar from "./ActivityDetailedSidebar";
 
-const ActivityDetails = () => {
+function ActivityDetails() {
   const { activityStore } = useStore();
   const { selectedActivity, loadActivity, loadingInitial } = activityStore;
   const { id } = useParams<{ id: string }>();
@@ -33,6 +33,6 @@ const ActivityDetails = () => {
       </Grid.Column>
     </Grid>
   );
-};
+}
 
 export default observer(ActivityDetails);
