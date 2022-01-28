@@ -8,7 +8,7 @@ using Persistence;
 
 namespace Application.Activities
 {
-    public class Create
+    public static class Create
     {
         public class Command : IRequest<Result<Unit>>
         {

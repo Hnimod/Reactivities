@@ -1,3 +1,4 @@
+using API.Middleware;
 using Application.Activities;
 using Application.Core;
 using MediatR;
@@ -17,10 +18,12 @@ namespace API.Extensions
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
+            
             services.AddDbContext<DataContext>(opt =>
             {
                 opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
             });
+            
             services.AddCors(opt =>
             {
                 opt.AddPolicy("CorsPolicy", policy =>
@@ -28,8 +31,12 @@ namespace API.Extensions
                     policy.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000");
                 });
             });
+            
             services.AddMediatR(typeof(List.Handler).Assembly);
+            
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
+
+            services.AddTransient<ExceptionMiddleware>();
 
             return services;
         }

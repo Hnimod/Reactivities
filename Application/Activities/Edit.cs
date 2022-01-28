@@ -9,7 +9,7 @@ using Persistence;
 
 namespace Application.Activities
 {
-    public class Edit
+    public static class Edit
     {
         public class Command : IRequest<Result<Unit>>
         {
