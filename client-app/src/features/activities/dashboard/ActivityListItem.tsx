@@ -24,7 +24,7 @@ function ActivityListItem({ activity }: Props) {
       </Segment>
       <Segment>
         <span>
-          <Icon name="clock" /> {activity.date}
+          <Icon name="clock" /> {activity.date?.toLocaleString("en-GB")}
           <Icon name="marker" /> {activity.venue}
         </span>
       </Segment>
