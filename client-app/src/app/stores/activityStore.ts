@@ -35,6 +35,22 @@ export default class ActivityStore {
     this.activityRegistry.set(activity.id, modifiedActivity);
   };
 
+  selectActivity = (activity: Activity) => {
+    this.selectedActivity = activity;
+  };
+
+  setLoadingInitial = (value: boolean) => {
+    this.loadingInitial = value;
+  };
+
+  setEditMode = (value: boolean) => {
+    this.editMode = value;
+  };
+
+  setLoading = (value: boolean) => {
+    this.loading = value;
+  };
+
   createActivity = async (activity: Activity) => {
     let newActivity: Activity | undefined;
     try {
@@ -100,22 +116,6 @@ export default class ActivityStore {
     } finally {
       this.setLoadingInitial(false);
     }
-  };
-
-  selectActivity = (activity: Activity) => {
-    this.selectedActivity = activity;
-  };
-
-  setLoadingInitial = (value: boolean) => {
-    this.loadingInitial = value;
-  };
-
-  setEditMode = (value: boolean) => {
-    this.editMode = value;
-  };
-
-  setLoading = (value: boolean) => {
-    this.loading = value;
   };
 
   updateActivity = async (activity: Activity) => {
