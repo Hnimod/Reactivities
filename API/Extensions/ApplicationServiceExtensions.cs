@@ -1,6 +1,8 @@
 using API.Middleware;
 using Application.Activities;
 using Application.Core;
+using Application.Interfaces;
+using Infrastructure.Security;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -37,6 +39,8 @@ namespace API.Extensions
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 
             services.AddTransient<ExceptionMiddleware>();
+
+            services.AddScoped<IUserAccessor, UserAccessor>();
 
             return services;
         }

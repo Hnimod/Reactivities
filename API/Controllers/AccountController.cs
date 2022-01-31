@@ -60,12 +60,14 @@ namespace API.Controllers
         {
             if (await _userManager.Users.AnyAsync(u => u.Email == registerDto.Email))
             {
-                return BadRequest("Email is already exist");
+                ModelState.AddModelError("email", "Email is already exist");
+                return ValidationProblem();
             }
             
             if (await _userManager.Users.AnyAsync(u => u.UserName == registerDto.UserName))
             {
-                return BadRequest("User name is already exist");
+                ModelState.AddModelError("username", "User name is already exist");
+                return ValidationProblem();
             }
 
             var user = new AppUser
@@ -89,7 +91,11 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<UserDto>> Me()
         {
-            var user = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
+            var claimEmail = User.FindFirstValue(ClaimTypes.Email);
+            
+            if (claimEmail == null) return Unauthorized();
+            
+            var user = await _userManager.FindByEmailAsync(claimEmail);
 
             return CreateUserObject(user);
         }
