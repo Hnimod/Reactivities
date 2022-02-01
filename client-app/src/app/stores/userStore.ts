@@ -20,29 +20,39 @@ export default class UserStore {
   };
 
   getUser = async () => {
-    const user = await agent.Account.me();
-    this.setUser(user);
+    const result = await agent.Account.me();
+    if (result.isSuccess) {
+      this.setUser(result.value);
+    }
+    return result;
   };
 
   login = async (cridentials: UserFormValues) => {
-    const user = await agent.Account.login(cridentials);
-    store.commonStore.setToken(user.token);
-    this.setUser(user);
-    history.replace("/activities");
-    store.modalStore.closeModal();
+    const result = await agent.Account.login(cridentials);
+    if (result.isSuccess) {
+      store.commonStore.setToken(result.value!.token);
+      this.setUser(result.value!);
+      history.replace("/activities");
+      store.modalStore.closeModal();
+    }
+    return result;
   };
 
   logout = () => {
     store.commonStore.setToken(null);
+    store.activityStore.clearActivity();
     this.setUser(null);
     history.replace("/");
   };
 
   register = async (cridentials: UserFormValues) => {
-    const user = await agent.Account.register(cridentials);
-    store.commonStore.setToken(user.token);
-    this.setUser(user);
-    history.replace("/activities");
-    store.modalStore.closeModal();
+    const result = await agent.Account.register(cridentials);
+    if (result.isSuccess) {
+      store.commonStore.setToken(result.value!.token);
+      this.setUser(result.value!);
+      history.replace("/activities");
+      store.modalStore.closeModal();
+    }
+    return result;
   };
 }

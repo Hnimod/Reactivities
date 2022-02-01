@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 
 import { history } from "../..";
-import { Activity } from "../models/activity";
+import { Activity, ActivityFormValues } from "../models/activity";
 import { User, UserFormValues } from "../models/users";
 import { store } from "../stores/store";
 
@@ -11,6 +11,30 @@ const sleep = (delay: number) => {
     setTimeout(resolve, delay);
   });
 };
+
+export const httpFactory = async <T>(fn: Promise<T>): Promise<Result<T>> => {
+  try {
+    const res = await fn;
+    return Result.Success(res);
+  } catch (error) {
+    return Result.Failure(error);
+  }
+};
+
+export class Result<T> {
+  readonly isSuccess: boolean;
+  readonly error: any;
+  readonly value: T | null;
+
+  constructor(isSuccess: boolean, error: any, value: T | null) {
+    this.isSuccess = isSuccess;
+    this.error = error;
+    this.value = value;
+  }
+
+  public static Success = <T>(value: T) => new Result<T>(true, null, value);
+  public static Failure = <T>(error: any) => new Result<T>(false, error, null);
+}
 
 axios.defaults.baseURL = "http://localhost:5000/api";
 
@@ -38,6 +62,7 @@ axios.interceptors.response.use(
           for (const key in data.errors) {
             if (data.errors[key]) modalStateErrors.push(data.errors[key]);
           }
+          toast.error("400");
           throw modalStateErrors.flat();
         }
         break;
@@ -54,25 +79,27 @@ axios.interceptors.response.use(
       default:
         toast.error("Something wrong");
     }
-    return Promise.resolve(error);
+    return Promise.reject(error);
   }
 );
 
 const requestBody = <T>(response: AxiosResponse<T>) => response.data;
 
 const requests = {
-  get: <T>(url: string) => axios.get<T>(url).then(requestBody),
-  post: <T>(url: string, body: object) => axios.post<T>(url, body).then(requestBody),
-  put: <T>(url: string, body: object) => axios.put<T>(url, body).then(requestBody),
-  delete: <T>(url: string) => axios.delete<T>(url).then(requestBody),
+  get: <T>(url: string) => httpFactory(axios.get<T>(url).then(requestBody)),
+  post: <T>(url: string, body: object) => httpFactory(axios.post<T>(url, body).then(requestBody)),
+  put: <T>(url: string, body: object) => httpFactory(axios.put<T>(url, body).then(requestBody)),
+  delete: <T>(url: string) => httpFactory(axios.delete<T>(url).then(requestBody)),
 };
 
 const Activities = {
   list: () => requests.get<Activity[]>("/activities"),
   details: (id: string) => requests.get<Activity>(`/activities/${id}`),
-  create: (activity: Activity) => requests.post<void>("/activities", activity),
-  update: (activity: Activity) => requests.put<void>(`/activities/${activity.id}`, activity),
+  create: (activity: ActivityFormValues) => requests.post<void>("/activities", activity),
+  update: (activity: ActivityFormValues) =>
+    requests.put<void>(`/activities/${activity.id}`, activity),
   delete: (id: string) => requests.delete<void>(`/activities/${id}`),
+  attend: (id: string) => requests.post<void>(`activities/${id}/attend`, {}),
 };
 
 const Account = {

@@ -11,8 +11,9 @@ import ActivityDetailedChat from "./ActivityDetailedChat";
 import ActivityDetailedSidebar from "./ActivityDetailedSidebar";
 
 function ActivityDetails() {
-  const { activityStore } = useStore();
-  const { selectedActivity, loadActivity, loadingInitial } = activityStore;
+  const {
+    activityStore: { selectedActivity, loadActivity, loadingInitial },
+  } = useStore();
   const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
@@ -29,7 +30,7 @@ function ActivityDetails() {
         <ActivityDetailedChat />
       </Grid.Column>
       <Grid.Column width={6}>
-        <ActivityDetailedSidebar />
+        <ActivityDetailedSidebar activity={selectedActivity} />
       </Grid.Column>
     </Grid>
   );

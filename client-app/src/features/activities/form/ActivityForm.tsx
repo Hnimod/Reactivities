@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { Formik, Form } from "formik";
+import { Formik, Form, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import { useParams, useHistory, Link } from "react-router-dom";
 import { Button, Header, Segment } from "semantic-ui-react";
 
-import { Activity } from "../../../app/models/activity";
+import { ActivityFormValues } from "../../../app/models/activity";
 import { useStore } from "../../../app/stores/store";
 import { categoryOptions } from "../../../app/common/options/categoryOptions";
 import LoadingComponent from "../../../app/layout/LoadingComponent";
@@ -17,39 +17,41 @@ import MyDateInput from "../../../app/common/form/MyDateInput";
 const ActivityForm = () => {
   const history = useHistory();
   const { activityStore } = useStore();
-  const { loading, updateActivity, createActivity, loadActivity, loadingInitial } = activityStore;
+  const { updateActivity, createActivity, loadActivity, loadingInitial } = activityStore;
   const { id } = useParams<{ id: string }>();
-  const [activity, setActivity] = useState<Activity>({
-    id: "",
-    title: "",
-    date: null,
-    description: "",
-    category: "",
-    city: "",
-    venue: "",
-  });
+  const [activity, setActivity] = useState<ActivityFormValues>(new ActivityFormValues());
 
   useEffect(() => {
-    if (id) loadActivity(id).then(activity => setActivity(activity!));
+    if (id)
+      loadActivity(id).then(res => {
+        if (res.value) setActivity(new ActivityFormValues(res.value));
+      });
   }, [id, loadActivity]);
 
   const validationSchema = Yup.object({
     title: Yup.string().required("Title is required"),
     description: Yup.string().required(),
     category: Yup.string().required(),
-    date: Yup.string().required("Date is required").nullable(),
+    date: Yup.date().required("Date is required").nullable(),
     venue: Yup.string().required(),
     city: Yup.string().required(),
   });
 
-  const handleFormSubmit = (activity: Activity) => {
+  const handleFormSubmit = (
+    activity: ActivityFormValues,
+    helpers: FormikHelpers<ActivityFormValues>
+  ) => {
     activity.id
-      ? updateActivity(activity).then(a => {
-          if (a?.id) history.push(`/activities/${a.id}`);
-        })
-      : createActivity(activity).then(a => {
-          if (a?.id) history.push(`/activities/${a.id}`);
-        });
+      ? updateActivity(activity)
+          .then(res => {
+            if (res.isSuccess) history.push(`/activities/${res.value!.id}`);
+          })
+          .finally(() => helpers.setSubmitting(false))
+      : createActivity(activity)
+          .then(res => {
+            if (res.isSuccess) history.push(`/activities/${res.value!.id}`);
+          })
+          .finally(() => helpers.setSubmitting(false));
   };
 
   if (loadingInitial) return <LoadingComponent />;
@@ -79,7 +81,7 @@ const ActivityForm = () => {
             <MyTextInput placeholder="City" name="city" />
             <MyTextInput placeholder="Venue" name="venue" />
             <Button
-              loading={loading}
+              loading={isSubmitting}
               floated="right"
               positive
               type="submit"
