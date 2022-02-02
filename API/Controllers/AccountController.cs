@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using API.Dtos;
@@ -34,7 +35,7 @@ namespace API.Controllers
             return new UserDto
             {
                 DisplayName = user.DisplayName,
-                Image = null,
+                Image = user.Photos?.FirstOrDefault(p => p.IsMain)?.Url,
                 Token = _tokenService.CreateToken(user),
                 UserName = user.UserName
             };
@@ -43,7 +44,9 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
-            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+            var user = await _userManager.Users.Include(u => u.Photos)
+                .FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+            
             if (user == null) return Unauthorized();
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
@@ -63,7 +66,7 @@ namespace API.Controllers
                 ModelState.AddModelError("email", "Email is already exist");
                 return ValidationProblem();
             }
-            
+
             if (await _userManager.Users.AnyAsync(u => u.UserName == registerDto.UserName))
             {
                 ModelState.AddModelError("username", "User name is already exist");
@@ -92,10 +95,11 @@ namespace API.Controllers
         public async Task<ActionResult<UserDto>> Me()
         {
             var claimEmail = User.FindFirstValue(ClaimTypes.Email);
-            
+
             if (claimEmail == null) return Unauthorized();
-            
-            var user = await _userManager.FindByEmailAsync(claimEmail);
+
+            var user = await _userManager.Users.Include(u => u.Photos)
+                .FirstOrDefaultAsync(u => u.Email == claimEmail);
 
             return CreateUserObject(user);
         }
