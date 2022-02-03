@@ -1,8 +1,9 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 
 import { history } from "../..";
 import { Activity, ActivityFormValues } from "../models/activity";
+import { Photo, Profile } from "../models/profile";
 import { User, UserFormValues } from "../models/users";
 import { store } from "../stores/store";
 
@@ -86,9 +87,12 @@ axios.interceptors.response.use(
 const requestBody = <T>(response: AxiosResponse<T>) => response.data;
 
 const requests = {
-  get: <T>(url: string) => httpFactory(axios.get<T>(url).then(requestBody)),
-  post: <T>(url: string, body: object) => httpFactory(axios.post<T>(url, body).then(requestBody)),
-  put: <T>(url: string, body: object) => httpFactory(axios.put<T>(url, body).then(requestBody)),
+  get: <T>(url: string, config?: AxiosRequestConfig) =>
+    httpFactory(axios.get<T>(url, config).then(requestBody)),
+  post: <T>(url: string, body: object, config?: AxiosRequestConfig) =>
+    httpFactory(axios.post<T>(url, body, config).then(requestBody)),
+  put: <T>(url: string, body: object, config?: AxiosRequestConfig) =>
+    httpFactory(axios.put<T>(url, body, config).then(requestBody)),
   delete: <T>(url: string) => httpFactory(axios.delete<T>(url).then(requestBody)),
 };
 
@@ -108,9 +112,23 @@ const Account = {
   register: (user: UserFormValues) => requests.post<User>("/account/register", user),
 };
 
+const Profiles = {
+  get: (userName: string) => requests.get<Profile>(`/profiles/${userName}`),
+  uploadPhoto: (file: Blob) => {
+    const formData = new FormData();
+    formData.append("File", file);
+    return requests.post<Photo>("photos", formData, {
+      headers: { "Conten-type": "multipart/form-data" },
+    });
+  },
+  setMainPhoto: (id: string) => requests.post<void>(`/photos/${id}/setMain`, {}),
+  deletePhoto: (id: string) => requests.delete<void>(`/photos/${id}`),
+};
+
 const agent = {
   Activities,
   Account,
+  Profiles,
 };
 
 export default agent;

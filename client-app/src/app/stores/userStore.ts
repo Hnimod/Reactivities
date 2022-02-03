@@ -15,6 +15,10 @@ export default class UserStore {
     return !!this.user;
   };
 
+  setImage = (image: string) => {
+    if (this.user) this.user.image = image;
+  };
+
   setUser = (user: User | null) => {
     this.user = user;
   };

@@ -8,7 +8,19 @@ interface Props {
 }
 
 function ActivityListItem({
-  activity: { id, title, date, venue, description, attendees, host, isHost, isGoing, isCancelled },
+  activity: {
+    id,
+    title,
+    date,
+    venue,
+    description,
+    attendees,
+    host,
+    isHost,
+    isGoing,
+    isCancelled,
+    hostUserName,
+  },
 }: Props) {
   return (
     <Segment.Group>
@@ -18,12 +30,19 @@ function ActivityListItem({
       <Segment>
         <Item.Group>
           <Item>
-            <Item.Image style={{ marginBottom: 5 }} size="tiny" circular src="/assets/user.png" />
+            <Item.Image
+              style={{ marginBottom: 5 }}
+              size="tiny"
+              circular
+              src={host?.image || "/assets/user.png"}
+            />
             <Item.Content>
               <Item.Header as={Link} to={`/activities/${id}`}>
                 {title}
               </Item.Header>
-              <Item.Description>Hosted by {host?.displayName}</Item.Description>
+              <Item.Description>
+                Hosted by <Link to={`/profiles/${hostUserName}`}>{host?.displayName}</Link>
+              </Item.Description>
               {isHost && (
                 <Item.Description>
                   <Label basic color="orange">
